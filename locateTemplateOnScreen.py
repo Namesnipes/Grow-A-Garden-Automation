@@ -5,7 +5,7 @@ from PIL import ImageGrab
 
 import Constants.constantsScreenshot as constants
 
-def locateTemplateOnScreen(region, targetImage):
+def locateTemplateOnScreen(region, targetImage, grayscale=True):
     '''
     Takes a partial screenshot of the current screen and checks if the target image is present.
     If the target image is found, it returns the center coordinates of the target image.
@@ -13,7 +13,10 @@ def locateTemplateOnScreen(region, targetImage):
     '''
 
     screenshot = ImageGrab.grab(bbox=region)
-    screenshotGray = cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGR2GRAY) # Convert to grayscale for better matching
+    if grayscale:
+        screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGR2GRAY) # Convert to grayscale for better matching
+    else:
+        screenshot = np.array(screenshot)
     # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
     # cv2.imwrite(f"debugScreenshot{timestamp}.png", screenshotGray)  # Save the screenshot for debugging purposes
 
@@ -24,10 +27,12 @@ def locateTemplateOnScreen(region, targetImage):
     # Scale the target images to find the match with the most confidence, preventing false positives
     for scale in np.arange(constants.scaleRange[0], constants.scaleRange[1], constants.scaleStep):
         targetImageScaled = cv2.resize(targetImage, None, fx=scale, fy=scale)
-
-        result = cv2.matchTemplate(screenshotGray, targetImageScaled, cv2.TM_CCOEFF_NORMED) # TM_CCOEFF_NORMED is the most commonly used equation for template matching
+        if grayscale:
+            result = cv2.matchTemplate(screenshot, targetImageScaled, cv2.TM_CCOEFF_NORMED) # TM_CCOEFF_NORMED is the most commonly used equation for template matching
+        else:
+            result = cv2.matchTemplate(screenshot, targetImageScaled,  cv2.TM_SQDIFF)
         maxVal, _, maxLoc = cv2.minMaxLoc(result)[1:] # maxVal is the maximum confidence of the result for any pixel, and maxLoc is the coordinates of said pixel
-
+        #print(f"Scale: {scale}, Max Value: {maxVal}, Max Location: {maxLoc}")
         if maxVal >= constants.threshold and maxVal > bestMatchValue:
             bestMatch = maxLoc
             bestMatchValue = maxVal
