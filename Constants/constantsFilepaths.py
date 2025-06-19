@@ -47,9 +47,24 @@ seedShopItemTemplatePaths = [
 ]
 
 honeyShopItemTemplatePaths = [
-    "Screenshots/Honey Items/BeeEgg.png",
-    "Screenshots/Honey Items/FlowerSeed.png",
+    "Screenshots/Honey Items/HoneyFlower.png",
+    #"Screenshots/Honey Items/HoneyLavender.png",
+    #"Screenshots/Honey Items/HoneyNectarshade.png",
+    #"Screenshots/Honey Items/HoneyNectarine.png",
+    #"Screenshots/Honey Items/HoneyHive.png",
+    #"Screenshots/Honey Items/HoneyPollen.png",
+    "Screenshots/Honey Items/HoneyStaff.png",
+    "Screenshots/Honey Items/HoneyHoney.png",
+    "Screenshots/Honey Items/HoneyEgg.png",
+    "Screenshots/Honey Items/HoneyCrate.png",
+    #"Screenshots/Honey Items/HoneyComb.png",
+    #"Screenshots/Honey Items/HoneyChair.png",
+    #"Screenshots/Honey Items/HoneyTorch.png",
+    #"Screenshots/Honey Items/HoneyWalkway.png"
 ]
+
+honeyTradePaths = ["Screenshots/HoneyShop.png", 
+                   "Screenshots/HoneyShop2.png"]
 
 # The image path for the X button to close the shop
 XButtonImagePaths = ["Screenshots/X1.png", "Screenshots/X2.png"]

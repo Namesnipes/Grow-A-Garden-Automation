@@ -2,9 +2,11 @@ import datetime
 import functools
 from time import sleep
 import autoit
+from autoit import AutoItError
 import cv2
 import numpy as np
 from PIL import ImageGrab
+import logging
 
 from Constants import constantsFilepaths
 from locateTemplateOnScreen import locateTemplateOnScreen
@@ -24,12 +26,13 @@ def ensure_roblox_active(func):
         is_active = autoit.win_active(ROBLOX_WINDOW_TITLE)
 
         if not is_active:
-            print(
+            logging.info(
                 f"Pre-check: Window '{ROBLOX_WINDOW_TITLE}' is NOT active for '{func.__name__}'."
             )
+            quit()
             return False  # Or raise a custom exception here
 
-        print(f"Executing '{func.__name__}' for '{ROBLOX_WINDOW_TITLE}'...")
+        logging.debug(f"Executing '{func.__name__}' for '{ROBLOX_WINDOW_TITLE}'...")
         return func(*args, **kwargs)  # Execute the original autoit function
 
     return wrapper
@@ -114,6 +117,51 @@ def click_absolute(x, y):
     move(x, y)  # Move mouse to the clicked position for visual feedback
     click("left", x, y)
     autoit.auto_it_set_option("MouseCoordMode", 2)
+
+from ctypes.wintypes import BOOL, HWND, POINT
+from ctypes import byref
+
+# What you NEED to add:
+from ctypes import WinDLL, POINTER # <--- These two imports
+
+# Load user32.dll for standard Windows API functions
+User32 = WinDLL('user32') # <--- This line loads a system DLL, not a package
+
+# Define the ScreenToClient function signature
+# BOOL WINAPI ScreenToClient(HWND hWnd, LPPOINT lpPoint);
+User32.ScreenToClient.restype = BOOL
+User32.ScreenToClient.argtypes = [HWND, POINTER(POINT)] # <--- This defines how to call the function
+
+# ... (your existing functions) ...
+
+# Your new function
+def convert_absolute_to_client_coords(abs_x, abs_y, handle=ROBLOX_WINDOW_HWID):
+    """
+    Converts absolute screen coordinates to client coordinates relative to a window.
+
+    :param handle: The handle (HWND) of the window.
+    :param abs_x: The absolute X coordinate on the screen.
+    :param abs_y: The absolute Y coordinate on the screen.
+    :return: A tuple (client_x, client_y) representing the coordinates
+             relative to the window's client area.
+    :raises AutoItError: If the conversion fails (e.g., invalid window handle).
+    """
+    # Create a POINT structure and set its initial values to the absolute coordinates
+    point = POINT(abs_x, abs_y)
+
+    # Call the ScreenToClient function. It modifies the 'point' structure in-place.
+    ret = User32.ScreenToClient(HWND(handle), byref(point))
+
+    if not ret:
+        # ScreenToClient returns FALSE (0) on failure
+        # GetLastError might provide more specific error details if needed
+        # import ctypes
+        # error_code = ctypes.GetLastError()
+        # error_message = ctypes.FormatError(error_code)
+        raise AutoItError(f"Failed to convert absolute coordinates to client "
+                          f"for window handle {handle}. Absolute coords: ({abs_x}, {abs_y}).")
+
+    return point.x, point.y
 
 
 # --- Highest Level Functions ---

@@ -9,7 +9,7 @@ import Constants.constantsFilepaths as filepaths
 from actionQueue import ActionQueue
 from buyEggs import buyEggShop
 from buyGearShop import buyGearShop
-from buyHoney import buyHoney
+from buyHoney import buyHoneyShop
 from buySeedShop import buySeedShop
 import sys
 from threading import Event, Thread
@@ -117,41 +117,44 @@ def main():
     alignCamera()
     buy_honey_thread = threading.Thread(
     target=run_task_in_loop, 
-    args=(300, lambda: actionQueue.add(buyHoney)),
+    args=(1800, lambda: actionQueue.add(buyHoneyShop)),
     daemon=True
     )
 
     clear_thread = threading.Thread(
     target=run_task_in_loop, 
-    args=(120, lambda: actionQueue.add(clear_robux_popup)),
+    args=(900, lambda: actionQueue.add(clear_robux_popup)),
     daemon=True
     )
 
     honey_thread = threading.Thread(
     target=run_task_in_loop, 
-    args=(120, lambda: actionQueue.add(makeHoney)),
+    args=(300, lambda: actionQueue.add(makeHoney)),
     daemon=True
     )
 
     gear_shop_thread = threading.Thread(
     target=run_task_in_loop, 
-    args=(120, lambda: actionQueue.add(buyGearShop)),
+    args=(300, lambda: actionQueue.add(buyGearShop)),
     daemon=True
     )
 
     seed_shop_thread = threading.Thread(
     target=run_task_in_loop, 
-    args=(120, lambda: actionQueue.add(buySeedShop)),
+    args=(300, lambda: actionQueue.add(buySeedShop)),
     daemon=True
     )
 
     egg_shop_thread = threading.Thread(
     target=run_task_in_loop, 
-    args=(120, lambda: actionQueue.add(buyEggShop)),
+    args=(1800, lambda: actionQueue.add(buyEggShop)),
     daemon=True
     )
+
     print("Starting background tasks...")
-    #honey_thread.start()
+    buy_honey_thread.start()
+    clear_thread.start()
+    honey_thread.start()
     gear_shop_thread.start()
     seed_shop_thread.start()
     egg_shop_thread.start()

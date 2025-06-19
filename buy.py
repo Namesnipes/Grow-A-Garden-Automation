@@ -10,7 +10,25 @@ from locateTemplateOnScreen import locateTemplateOnScreen
 import window_actions as autoit
 from PIL import ImageGrab
 
-def buy(thingsToBuy):
+def getMoneySymbol():
+    '''
+    Detects the money symbol in the shop window to ensure that the player has enough money to buy items.
+    Returns True if the money symbol is found, False otherwise.
+    '''
+    
+    region = (constants.shopWindowPosX1, constants.shopWindowY1, constants.shopWindowPosX2, constants.shopWindowY2)
+    moneySymbolImage = cv2.imread(filepaths.moneySymbolImagePath, cv2.IMREAD_GRAYSCALE)
+    
+    moneySymbolCoords = locateTemplateOnScreen(region, moneySymbolImage, grayscale=True)
+    
+    if moneySymbolCoords is not None:
+        print(f"Money symbol found at coordinates: {moneySymbolCoords}")
+        return moneySymbolCoords
+    else:
+        print("Money symbol not found.")
+        return None
+
+def buy(thingsToBuy, PriceCheck=getMoneySymbol):
     '''
     Automatically buys the desired items from a given shop in the game.
     '''
@@ -26,6 +44,7 @@ def buy(thingsToBuy):
             coords = None  # Initialize coords to None for each item
             tries = 0
             while coords is None:
+                print(imagePath)
                 targetImage = cv2.imread(imagePath, cv2.IMREAD_GRAYSCALE) # Read the image in grayscale for better matching
                 # Defines the region of the shop window
                 region = (constants.shopWindowPosX1, constants.shopWindowY1, constants.shopWindowPosX2, constants.shopWindowY2)
@@ -48,9 +67,7 @@ def buy(thingsToBuy):
 
                 autoit.click_absolute(coords[0], coords[1])
                 sleep(0.5) # Wait for the animation to finish
-
-                moneySymbolImage = cv2.imread(filepaths.moneySymbolImagePath, cv2.IMREAD_GRAYSCALE)
-                moneySymbolCoords = locateTemplateOnScreen(region, moneySymbolImage, grayscale=True)
+                moneySymbolCoords = PriceCheck()
 
                 if moneySymbolCoords is not None: # Found the money symbol indicating that we can buy the item
                     autoit.click_absolute(moneySymbolCoords[0], moneySymbolCoords[1])
@@ -60,21 +77,3 @@ def buy(thingsToBuy):
                         autoit.click("left")
         
         toBuy = list(updatedToBuy)
-
-def getMoneySymbol():
-    '''
-    Detects the money symbol in the shop window to ensure that the player has enough money to buy items.
-    Returns True if the money symbol is found, False otherwise.
-    '''
-    
-    region = (constants.shopWindowPosX1, constants.shopWindowY1, constants.shopWindowPosX2, constants.shopWindowY2)
-    moneySymbolImage = cv2.imread(filepaths.moneySymbolImagePath, cv2.IMREAD_GRAYSCALE)
-    
-    moneySymbolCoords = locateTemplateOnScreen(region, moneySymbolImage, grayscale=True)
-    
-    if moneySymbolCoords is not None:
-        print(f"Money symbol found at coordinates: {moneySymbolCoords}")
-        return moneySymbolCoords
-    else:
-        print("Money symbol not found.")
-        return None

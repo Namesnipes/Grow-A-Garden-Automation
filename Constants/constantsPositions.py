@@ -48,7 +48,7 @@ gearShopOptionsX1 = 470 / screenWidth
 gearShopOptionsY1 = 271 / screenHeight
 # Bottom right corner of the gear shop options menu 767, 345
 gearShopOptionsX2 = 767 / screenWidth
-gearShopOptionsY2 = 345 / screenHeight
+gearShopOptionsY2 = 400 / screenHeight
 # Convert to relative positions
 gearShopOptionsPosX1, gearShopOptionsY1 = int(screenWidth * gearShopOptionsX1), int(screenHeight * gearShopOptionsY1)
 gearShopOptionsPosX2, gearShopOptionsY2 = int(screenWidth * gearShopOptionsX2), int(screenHeight * gearShopOptionsY2)

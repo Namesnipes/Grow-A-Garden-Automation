@@ -1,9 +1,12 @@
+from datetime import datetime
 import cv2
 import numpy as np
 # from datetime import datetime # For debugging purposes
 from PIL import ImageGrab
 
 import Constants.constantsScreenshot as constants
+from Constants import constantsPositions
+import window_actions
 
 def locateTemplateOnScreen(region, targetImage, grayscale=True):
     '''
@@ -45,3 +48,31 @@ def locateTemplateOnScreen(region, targetImage, grayscale=True):
         return (centerX + region[0], centerY + region[1])  # Adjust for the region offset
     else:
         return None
+    
+def getColorOnScreen(hex):
+    """
+    Find the first pixel that matches the given hex color on the screen.
+    
+    :param hex: The hex color to search for (e.g., '#FF5733').
+    :return: True if a pixel was clicked, False otherwise.
+    """
+    # Convert hex to RGB
+    hex = hex.lstrip('#')
+    rgb = tuple(int(hex[i:i + 2], 16) for i in (0, 2, 4))
+
+    # Take a screenshot of the entire screen
+    screenshot = ImageGrab.grab()
+    screenshot_np = np.array(screenshot)
+
+    # Convert the screenshot to RGB format
+    screenshot_rgb = cv2.cvtColor(screenshot_np, cv2.COLOR_BGR2RGB)
+
+    # Find all pixels that match the target color
+    matching_pixels = np.where(np.all(screenshot_rgb == rgb, axis=-1))
+
+    if matching_pixels[0].size > 0:
+        # Click the first matching pixel
+        x, y = matching_pixels[1][0], matching_pixels[0][0]
+        return [x,y]
+
+    return None
