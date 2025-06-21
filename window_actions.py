@@ -1,12 +1,13 @@
 import datetime
 import functools
+import logging
 from time import sleep
+
 import autoit
-from autoit import AutoItError
 import cv2
 import numpy as np
+from autoit import AutoItError
 from PIL import ImageGrab
-import logging
 
 from Constants import constantsFilepaths
 from locateTemplateOnScreen import locateTemplateOnScreen
@@ -118,21 +119,24 @@ def click_absolute(x, y):
     click("left", x, y)
     autoit.auto_it_set_option("MouseCoordMode", 2)
 
-from ctypes.wintypes import BOOL, HWND, POINT
-from ctypes import byref
 
 # What you NEED to add:
-from ctypes import WinDLL, POINTER # <--- These two imports
+from ctypes import POINTER, WinDLL, byref  # <--- These two imports
+from ctypes.wintypes import BOOL, HWND, POINT
 
 # Load user32.dll for standard Windows API functions
-User32 = WinDLL('user32') # <--- This line loads a system DLL, not a package
+User32 = WinDLL("user32")  # <--- This line loads a system DLL, not a package
 
 # Define the ScreenToClient function signature
 # BOOL WINAPI ScreenToClient(HWND hWnd, LPPOINT lpPoint);
 User32.ScreenToClient.restype = BOOL
-User32.ScreenToClient.argtypes = [HWND, POINTER(POINT)] # <--- This defines how to call the function
+User32.ScreenToClient.argtypes = [
+    HWND,
+    POINTER(POINT),
+]  # <--- This defines how to call the function
 
 # ... (your existing functions) ...
+
 
 # Your new function
 def convert_absolute_to_client_coords(abs_x, abs_y, handle=ROBLOX_WINDOW_HWID):
@@ -158,8 +162,10 @@ def convert_absolute_to_client_coords(abs_x, abs_y, handle=ROBLOX_WINDOW_HWID):
         # import ctypes
         # error_code = ctypes.GetLastError()
         # error_message = ctypes.FormatError(error_code)
-        raise AutoItError(f"Failed to convert absolute coordinates to client "
-                          f"for window handle {handle}. Absolute coords: ({abs_x}, {abs_y}).")
+        raise AutoItError(
+            f"Failed to convert absolute coordinates to client "
+            f"for window handle {handle}. Absolute coords: ({abs_x}, {abs_y})."
+        )
 
     return point.x, point.y
 
@@ -180,7 +186,7 @@ def closeGui():
         click_absolute(
             XButtonCoords[0], XButtonCoords[1]
         )  # Click the X button to close the gear shop
-        sleep(0.2)
+        sleep(0.5)
         click_absolute(XButtonCoords[0], XButtonCoords[1])
         click_window_center(False)
         return True
@@ -191,7 +197,7 @@ def closeGui():
         screenshot = ImageGrab.grab(bbox=region)
         screenshotGray = cv2.cvtColor(np.array(screenshot), cv2.COLOR_BGR2GRAY)
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-        cv2.imwrite(f"debugScreenshot{timestamp}.png", screenshotGray)
+        cv2.imwrite(f"debugScreenshotCLOSEGUI{timestamp}.png", screenshotGray)
         return False
 
 
